@@ -11,7 +11,7 @@ namespace
 
 int muxCallback(void* opaque, uint8_t* buf, int bufSize)
 {
-    auto muxer = static_cast<Mp4Muxer*>(opaque);
+    auto muxer = reinterpret_cast<Mp4Muxer*>(opaque);
     ByteVector &outputData = muxer->muxedMediaData;
     outputData.insert(outputData.end(), buf, buf + bufSize);
     return bufSize;
@@ -23,16 +23,14 @@ Mp4Muxer::Mp4Muxer(AVRational framerate)
       timeAheadInCommonTimebaseLimit(0),
       isHeaderWritten(false)
 {
-    if(auto buffer = new PageAlignedBuffer(); (ioCtxt = makeIoContext(this, nullptr, muxCallback)) == nullptr)
-    {
-        delete buffer;
+    if((ioCtxt = makeIoContext(this, nullptr, muxCallback)) == nullptr)
         throw MuxerException("Couldn't initialize I/O context");
-    }
 
     auto result = avformat_alloc_output_context2(&formatCtxt, nullptr, "mp4", nullptr);
     if(result < 0)
         throw MuxerException("Couldn't initialize format context; the error was: " + getAvErrorString(result));
     formatCtxt->pb = ioCtxt;
+    formatCtxt->strict_std_compliance = FF_COMPLIANCE_EXPERIMENTAL;
 
     auto videoStream = avformat_new_stream(formatCtxt, nullptr);
     if(videoStream == nullptr)

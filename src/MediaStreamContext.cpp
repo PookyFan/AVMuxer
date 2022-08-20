@@ -101,11 +101,9 @@ bool MediaStreamContext::initializeFormat()
 
     try
     {
-        if(auto buffer = new PageAlignedBuffer();
-        (ioCtxt = makeIoContext(this, ioRead, nullptr)) == nullptr)
+        if((ioCtxt = makeIoContext(this, ioRead, nullptr)) == nullptr)
         {
             log("MediaStreamContext::initializeFormat() - avio_alloc_context() failed", LogLevel::ERROR);
-            delete buffer;
             return false;
         }
         

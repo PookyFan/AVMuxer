@@ -35,20 +35,21 @@ template <class IoContext>
 void freeIoContextBuffer(IoContext* ctxt)
 {
     if(ctxt->buffer != nullptr)
-        delete reinterpret_cast<IoContext*>(ctxt->buffer);
-}
-
-template <class Packet>
-Packet& invalidatePacket(Packet& p)
-{
-    p.size = 0;
-    return p;
+        delete reinterpret_cast<PageAlignedBuffer*>(ctxt->buffer);
 }
 
 template <class Packet>
 bool isPacketValid(const Packet& p)
 {
     return p.size > 0;
+}
+
+template <class Packet>
+Packet& invalidatePacket(Packet& p)
+{
+    if(isPacketValid(p))
+        av_packet_unref(&p);
+    return p;
 }
 
 template <class TimeBase>
