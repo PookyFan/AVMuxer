@@ -26,7 +26,7 @@ int ioRead(void *opaque, uint8_t *buf, int bufsize)
 }
 
 MediaStreamContext::MediaStreamContext()
-    : mediaDataBuffer(), formatCtxt(nullptr), stream(nullptr),
+    : formatCtxt(nullptr), stream(nullptr),
       ioCtxt(nullptr), posInBuffer(0), packetsCount(0)
 {
 }
@@ -45,6 +45,9 @@ void MediaStreamContext::reset()
 
 void MediaStreamContext::fillBuffer(const ByteVector& data)
 {
+    if(data.empty())
+        return;
+    
     if(auto currentSize = mediaDataBuffer.size(); posInBuffer > 0 && (data.size() + currentSize) > mediaDataBuffer.capacity())
     {
         std::move(mediaDataBuffer.begin() + posInBuffer, mediaDataBuffer.end(), mediaDataBuffer.begin());

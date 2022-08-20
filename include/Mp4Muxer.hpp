@@ -33,9 +33,13 @@ class Mp4Muxer
         ByteVector muxedMediaData;
         AVFormatContext* formatCtxt;
         AVIOContext* ioCtxt;
+        int64_t audioAheadOfVideoInCommonTimebase;
+        int64_t timeAheadInCommonTimebaseLimit;
         bool isHeaderWritten;
         
-        void muxMediaData(const ByteVector& inputData, MediaStreamContext& mediaCtxt, const AVRational& otherStreamTimebase);
+        int muxAudioDataIntermediate(const ByteVector& inputData);
+        int muxVideoDataIntermediate(const ByteVector& inputData);
+        int muxMediaData(const ByteVector& inputData, MediaStreamContext& mediaCtxt, const AVRational& otherStreamTimebase, int timeUpdateSign);
         bool writeHeader();
 };
 }
