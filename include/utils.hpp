@@ -50,4 +50,10 @@ bool isPacketValid(const Packet& p)
 {
     return p.size > 0;
 }
+
+template <class TimeBase>
+bool isTimeBaseValid(TimeBase t)
+{
+    return t.den > 0;
+}
 }
