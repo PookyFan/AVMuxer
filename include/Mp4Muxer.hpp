@@ -1,25 +1,19 @@
 #pragma once
 
 #include "MediaStreamContext.hpp"
-
-extern "C"
-{
-    #include <libavformat/avformat.h>
-}
+#include "MediaContainerContext.hpp"
 
 namespace AVMuxer
 {
 class Mp4Muxer
 {
-    friend int muxCallback(void*, uint8_t*, int);
-
     public:
         Mp4Muxer(AVRational framerate);
         ~Mp4Muxer();
 
         bool hasMuxedData()
         {
-            return !muxedMediaData.empty();
+            return isMuxedDataAvailable;
         }
 
         bool muxAudioData(const ByteVector& inputData);
@@ -28,18 +22,16 @@ class Mp4Muxer
         ByteVector getMuxedData();
     
     private:
-        MediaStreamContext audioCtxt;
-        MediaStreamContext videoCtxt;
-        ByteVector muxedMediaData;
-        AVFormatContext* formatCtxt;
-        AVIOContext* ioCtxt;
-        int64_t audioAheadOfVideoInCommonTimebase;
-        int64_t timeAheadInCommonTimebaseLimit;
-        bool isHeaderWritten;
+        MediaContainerContext       containerCtxt;
+        MediaStreamContextSharedPtr videoCtxt;
+        MediaStreamContextSharedPtr audioCtxt;
+        int64_t                     audioAheadOfVideoInCommonTimebase;
+        int64_t                     timeAheadInCommonTimebaseLimit;
+        bool                        isMuxedDataAvailable;
         
         int muxAudioDataIntermediate(const ByteVector& inputData);
         int muxVideoDataIntermediate(const ByteVector& inputData);
-        int muxMediaData(const ByteVector& inputData, MediaStreamContext& mediaCtxt, const AVRational& otherStreamTimebase, int timeUpdateSign);
-        bool writeHeader();
+        int muxMediaData(const ByteVector& inputData, MediaStreamContext& mediaCtxt, int timeUpdateSign);
+
 };
 }

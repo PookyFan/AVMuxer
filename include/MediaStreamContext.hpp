@@ -3,6 +3,8 @@
 #include <cstdint>
 #include <vector>
 
+#include "AVIOContextWrapper.hpp"
+
 extern "C"
 {
     #include <libavformat/avformat.h>
@@ -18,34 +20,30 @@ class alignas(8*sizeof(void*)) MediaStreamContext
     friend int ioRead(void *opaque, uint8_t *buf, int bufsize);
     
     public:
-        MediaStreamContext();
+        MediaStreamContext(AVStream* newStream);
+        MediaStreamContext(const MediaStreamContext&) = delete;
+        MediaStreamContext(MediaStreamContext&&) = default;
         ~MediaStreamContext();
 
-        void reset();
-        void fillBuffer(const ByteVector& data);
+        void fillBuffer(const ByteVector& data) const;
         AVPacket getNextFrame();
 
-        bool hasQueuedData()
+        bool hasQueuedData() const
         {
             return !mediaDataBuffer.empty();
         }
 
-        auto getBufferedDataSize()
+        auto getBufferedDataSize() const
         {
             return mediaDataBuffer.size();
         }
 
-        void setStream(AVStream* newStream)
-        {
-            stream = newStream;
-        }
-
-        auto getStream()
+        auto getStream() const
         {
             return stream;
         }
 
-        operator bool()
+        operator bool() const
         {
             return formatCtxt != nullptr;
         }
@@ -53,14 +51,14 @@ class alignas(8*sizeof(void*)) MediaStreamContext
         bool initializeFormat();
     
     private:
-        ByteVector       mediaDataBuffer;
-        AVFormatContext* formatCtxt;
-        AVStream*        stream;
-        AVIOContext*     ioCtxt;
-        int              posInBuffer;
-        unsigned int     packetsCount;
-        
-        void cleanUpComponents();
+        mutable ByteVector mediaDataBuffer;
+        AVFormatContext*   formatCtxt;
+        AVStream*          stream;
+        AVIOContextWrapper ioCtxt;
+        mutable int        posInBuffer;
+        unsigned int       packetsCount;
+
+        void reset();
 };
 
 static_assert(sizeof(MediaStreamContext) == 32 || sizeof(MediaStreamContext) == 64);

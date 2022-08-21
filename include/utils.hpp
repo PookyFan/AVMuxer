@@ -31,13 +31,6 @@ std::string getAvErrorString(int errNr);
 
 AVIOContext* makeIoContext(void* applicationData, IoProcedurePtr readProc, IoProcedurePtr writeProc);
 
-template <class IoContext>
-void freeIoContextBuffer(IoContext* ctxt)
-{
-    if(ctxt->buffer != nullptr)
-        delete reinterpret_cast<PageAlignedBuffer*>(ctxt->buffer);
-}
-
 template <class Packet>
 bool isPacketValid(const Packet& p)
 {

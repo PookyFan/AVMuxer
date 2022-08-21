@@ -25,25 +25,20 @@ int ioRead(void *opaque, uint8_t *buf, int bufsize)
     return readSize;
 }
 
-MediaStreamContext::MediaStreamContext()
-    : formatCtxt(nullptr), stream(nullptr),
-      ioCtxt(nullptr), posInBuffer(0), packetsCount(0)
+MediaStreamContext::MediaStreamContext(AVStream* newStream)
+    : formatCtxt(nullptr), stream(newStream),
+      ioCtxt(this, ioRead, nullptr), posInBuffer(0), packetsCount(0)
 {
+    log("Creating MediaStreamContext instance", LogLevel::DEBUG);
 }
 
 MediaStreamContext::~MediaStreamContext()
 {
-    cleanUpComponents();
+    log("Deleting MediaStreamContext instance", LogLevel::DEBUG);
+    reset();
 }
 
-void MediaStreamContext::reset()
-{
-    cleanUpComponents();
-    mediaDataBuffer.clear();
-    stream = nullptr;
-}
-
-void MediaStreamContext::fillBuffer(const ByteVector& data)
+void MediaStreamContext::fillBuffer(const ByteVector& data) const
 {
     if(data.empty())
         return;
@@ -94,20 +89,14 @@ bool MediaStreamContext::initializeFormat()
 {
     auto cleanAndReportFailure = [this](const std::string& errMsg, bool asWarning = false)
     {
-        cleanUpComponents();
+        reset();
         log(errMsg, (asWarning ? LogLevel::WARNING : LogLevel::ERROR));
         return false;
     };
 
     try
     {
-        if((ioCtxt = makeIoContext(this, ioRead, nullptr)) == nullptr)
-        {
-            log("MediaStreamContext::initializeFormat() - avio_alloc_context() failed", LogLevel::ERROR);
-            return false;
-        }
-        
-        if(formatCtxt = avformat_alloc_context();formatCtxt == nullptr)
+        if(formatCtxt = avformat_alloc_context(); formatCtxt == nullptr)
             return cleanAndReportFailure("MediaStreamContext::initializeFormat() - avformat_alloc_context() failed");
         
         ioCtxt->seekable = 0;
@@ -125,12 +114,12 @@ bool MediaStreamContext::initializeFormat()
     }
     catch(const EofException& e)
     {
-        posInBuffer = 0;
+        reset();
         return cleanAndReportFailure("MediaStreamContext::initializeFormat() - not enough data buffered to identify input stream", true);
     }
     catch(...)
     {
-        posInBuffer = 0;
+        reset();
         return cleanAndReportFailure("MediaStreamContext::initializeFormat() - an unknown error occurred");
     }
 
@@ -143,16 +132,12 @@ bool MediaStreamContext::initializeFormat()
     return true;
 }
 
-void MediaStreamContext::cleanUpComponents()
+void MediaStreamContext::reset()
 {
     if(formatCtxt != nullptr)
         avformat_close_input(&formatCtxt);
-    if(ioCtxt != nullptr)
-    {
-        freeIoContextBuffer(ioCtxt);
-        avio_context_free(&ioCtxt);
-    }
 
+    ioCtxt.reset();
     posInBuffer = 0;
 }
 

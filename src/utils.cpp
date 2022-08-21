@@ -46,18 +46,4 @@ std::string getAvErrorString(int errNr)
     av_strerror(errNr, errMsg, AV_ERR_MSG_SIZE);
     return std::string(errMsg);
 }
-
-AVIOContext* makeIoContext(void* applicationData, IoProcedurePtr readProc, IoProcedurePtr writeProc)
-{
-    AVIOContext* ioCtxt;
-    if(auto buffer = std::make_unique<PageAlignedBuffer>();
-       (ioCtxt = avio_alloc_context(*buffer, buffer->size(), (writeProc == nullptr ? 0 : 1), applicationData, readProc, writeProc, nullptr)) == nullptr)
-    {
-        log("Could not initialize I/O context - avio_alloc_context() failed", LogLevel::ERROR);
-    }
-    else
-        buffer.release();
-
-    return ioCtxt;
-}
 }
