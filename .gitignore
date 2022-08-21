@@ -1,3 +1,4 @@
 *.o
 [Bb]in/
+[Bb]uild/
 .*/

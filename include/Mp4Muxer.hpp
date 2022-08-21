@@ -1,6 +1,6 @@
 #pragma once
 
-#include "include/MediaStreamContext.hpp"
+#include "MediaStreamContext.hpp"
 
 extern "C"
 {

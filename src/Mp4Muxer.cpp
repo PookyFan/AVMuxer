@@ -1,6 +1,6 @@
-#include "include/Mp4Muxer.hpp"
-#include "include/MuxerException.hpp"
-#include "include/utils.hpp"
+#include "Mp4Muxer.hpp"
+#include "MuxerException.hpp"
+#include "utils.hpp"
 
 namespace AVMuxer
 {

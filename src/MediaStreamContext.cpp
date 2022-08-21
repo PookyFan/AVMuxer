@@ -1,9 +1,9 @@
 #include <algorithm>
 #include <stdexcept>
 
-#include "include/MediaStreamContext.hpp"
-#include "include/MuxerException.hpp"
-#include "include/utils.hpp"
+#include "MediaStreamContext.hpp"
+#include "MuxerException.hpp"
+#include "utils.hpp"
 
 namespace AVMuxer
 {
