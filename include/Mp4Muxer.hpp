@@ -1,7 +1,9 @@
 #pragma once
 
-#include "MediaStreamContext.hpp"
-#include "MediaContainerContext.hpp"
+#include <memory>
+
+#include "MediaStreamWrapper.hpp"
+#include "MediaContainerWrapper.hpp"
 
 namespace AVMuxer
 {
@@ -21,17 +23,19 @@ class Mp4Muxer
         bool flush();
         ByteVector getMuxedData();
     
-    private:
-        MediaContainerContext       containerCtxt;
-        MediaStreamContextSharedPtr videoCtxt;
-        MediaStreamContextSharedPtr audioCtxt;
-        int64_t                     audioAheadOfVideoInCommonTimebase;
-        int64_t                     timeAheadInCommonTimebaseLimit;
-        bool                        isMuxedDataAvailable;
-        
+    protected:
+        std::shared_ptr<MediaContainerWrapper> containerCtxt;
+        WrappedMediaStreamSharedPtr  videoCtxt;
+        WrappedMediaStreamSharedPtr  audioCtxt;
+
+        int64_t audioAheadOfVideoInCommonTimebase;
+        int64_t timeAheadInCommonTimebaseLimit;
+        bool    isMuxedDataAvailable;
+
+    private:    
         int muxAudioDataIntermediate(const ByteVector& inputData);
         int muxVideoDataIntermediate(const ByteVector& inputData);
-        int muxMediaData(const ByteVector& inputData, MediaStreamContext& mediaCtxt, int timeUpdateSign);
+        int muxMediaData(const ByteVector& inputData, MediaStreamWrapper& mediaCtxt, int timeUpdateSign);
 
 };
 }

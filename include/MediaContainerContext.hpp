@@ -7,7 +7,8 @@
 
 namespace AVMuxer
 {
-using MediaStreamContextSharedPtr = std::shared_ptr<MediaStreamContext>;
+using MediaStreamSharedPtr = std::shared_ptr<MediaStreamContext>;
+
 class MediaContainerContext
 {
     friend int muxCallback(void*, uint8_t*, int);
@@ -21,16 +22,19 @@ class MediaContainerContext
             return writeHeaderIfNeeded();
         }
 
-        MediaStreamContextSharedPtr createStream();
-        MediaStreamContextSharedPtr createStream(AVRational framerate);
+        MediaStreamSharedPtr createStream(AVRational framerate);
 
         bool       muxFramePacket(AVPacket&& packet);
-        int64_t    getMaxInterleaveDelta() const;
         ByteVector getMuxedData();
+
+        AVFormatContext* getFormatContext() const
+        {
+            return formatCtxt;
+        }
         
     private:
         ByteVector muxedMediaData;
-        std::vector<MediaStreamContextSharedPtr> streamCtxts;
+        std::vector<MediaStreamSharedPtr> streamCtxts;
         AVFormatContext* formatCtxt;
         AVIOContextWrapper ioCtxt;
 

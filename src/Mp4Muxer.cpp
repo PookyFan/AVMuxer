@@ -12,12 +12,15 @@ namespace
 }
 
 Mp4Muxer::Mp4Muxer(AVRational framerate)
-    : containerCtxt("mp4"), videoCtxt(containerCtxt.createStream(framerate)),
-      audioCtxt(containerCtxt.createStream()),
+    : containerCtxt(std::make_shared<MediaContainerWrapper>("mp4")),
+      videoCtxt(containerCtxt->createStream(framerate)),
+      audioCtxt(containerCtxt->createStream()),
       audioAheadOfVideoInCommonTimebase(0),
       timeAheadInCommonTimebaseLimit(0), isMuxedDataAvailable(false)
 {
     log("Creating Mp4Muxer instance", LogLevel::DEBUG);
+    if(framerate.num <= 0 || framerate.den <= 0)
+        throw std::invalid_argument("Framerate can't be zero");
 }
 
 Mp4Muxer::~Mp4Muxer()
@@ -52,7 +55,7 @@ bool Mp4Muxer::flush()
 
 ByteVector Mp4Muxer::getMuxedData()
 {
-    return containerCtxt.getMuxedData();
+    return containerCtxt->getMuxedData();
 }
 
 inline int Mp4Muxer::muxAudioDataIntermediate(const ByteVector& inputData)
@@ -65,30 +68,27 @@ inline int Mp4Muxer::muxVideoDataIntermediate(const ByteVector& inputData)
     return muxMediaData(inputData, *videoCtxt, -1);
 }
 
-int Mp4Muxer::muxMediaData(const ByteVector& inputData, MediaStreamContext& mediaCtxt, int timeUpdateSign)
+int Mp4Muxer::muxMediaData(const ByteVector& inputData, MediaStreamWrapper& mediaCtxt, int timeUpdateSign)
 {
     mediaCtxt.fillBuffer(inputData);
-    if(!mediaCtxt)
-        mediaCtxt.initializeFormat();
-    
-    if(!containerCtxt)
+    if(!mediaCtxt || !*containerCtxt)
         return 0;
     
     if(timeAheadInCommonTimebaseLimit == 0)
-        timeAheadInCommonTimebaseLimit = containerCtxt.getMaxInterleaveDelta() * TIME_AHEAD_LIMIT_RATIO.num / TIME_AHEAD_LIMIT_RATIO.den;
+        timeAheadInCommonTimebaseLimit = containerCtxt->getMaxInterleaveDelta() * TIME_AHEAD_LIMIT_RATIO.num / TIME_AHEAD_LIMIT_RATIO.den;
     
     auto checkLimit = (timeUpdateSign > 0
         ? [](int64_t timeAhead, int64_t limit) { return timeAhead < limit; }
         : [](int64_t timeAhead, int64_t limit) { return timeAhead > -limit; });
     
     int packetsMuxedCnt = 0;
-    auto stream = mediaCtxt.getStream();
+    auto timebase = mediaCtxt.getTimeBase();
     for(auto packet = mediaCtxt.getNextFrame();
         isPacketValid(packet) && checkLimit(audioAheadOfVideoInCommonTimebase, timeAheadInCommonTimebaseLimit);
         packet = mediaCtxt.getNextFrame(), ++packetsMuxedCnt)
     {
-        audioAheadOfVideoInCommonTimebase += timeUpdateSign * av_rescale_q(packet.duration, stream->time_base, AV_TIME_BASE_Q);
-        isMuxedDataAvailable |= containerCtxt.muxFramePacket(std::move(packet));
+        audioAheadOfVideoInCommonTimebase += timeUpdateSign * av_rescale_q(packet.duration, timebase, AV_TIME_BASE_Q);
+        isMuxedDataAvailable |= containerCtxt->muxFramePacket(std::move(packet));
     }
     return packetsMuxedCnt;
 }

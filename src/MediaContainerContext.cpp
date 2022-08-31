@@ -34,12 +34,7 @@ MediaContainerContext::~MediaContainerContext()
         avformat_free_context(formatCtxt);
 }
 
-MediaStreamContextSharedPtr MediaContainerContext::createStream()
-{
-    return createStream({0, 0});
-}
-
-MediaStreamContextSharedPtr MediaContainerContext::createStream(AVRational framerate)
+MediaStreamSharedPtr MediaContainerContext::createStream(AVRational framerate)
 {
     auto stream = avformat_new_stream(formatCtxt, nullptr);
     if(stream == nullptr)
@@ -58,11 +53,6 @@ bool MediaContainerContext::muxFramePacket(AVPacket&& packet)
         throw MuxerException("Couldn't mux media data; the error was: " + getAvErrorString(result));
     
     return !muxedMediaData.empty();
-}
-
-int64_t MediaContainerContext::getMaxInterleaveDelta() const
-{
-    return formatCtxt->max_interleave_delta;
 }
 
 ByteVector MediaContainerContext::getMuxedData()

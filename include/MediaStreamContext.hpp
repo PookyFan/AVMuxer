@@ -33,12 +33,12 @@ class alignas(8*sizeof(void*)) MediaStreamContext
             return !mediaDataBuffer.empty();
         }
 
-        auto getBufferedDataSize() const
+        size_t getBufferedDataSize() const
         {
             return mediaDataBuffer.size();
         }
 
-        auto getStream() const
+        AVStream* getStream() const
         {
             return stream;
         }
