@@ -71,7 +71,6 @@ bool MediaContainerContext::writeHeaderIfNeeded()
     
     AVDictionary* options = nullptr;
     av_dict_set(&options, "movflags", "frag_keyframe+empty_moov+default_base_moof", 0);
-    formatCtxt->max_interleave_delta = 10000000LL * 10LL; //FIXME: seems to help with glitchy audio, but there must be a better solution
     auto result = avformat_write_header(formatCtxt, &options);
     if(result < 0)
         throw MuxerException("Couldn't write main header for MP4 container; the error was: " + getAvErrorString(result));
