@@ -55,6 +55,7 @@ bool Mp4Muxer::flush()
 
 ByteVector Mp4Muxer::getMuxedData()
 {
+    isMuxedDataAvailable = false;
     return containerCtxt->getMuxedData();
 }
 
@@ -81,14 +82,18 @@ int Mp4Muxer::muxMediaData(const ByteVector& inputData, MediaStreamWrapper& medi
         ? [](int64_t timeAhead, int64_t limit) { return timeAhead < limit; }
         : [](int64_t timeAhead, int64_t limit) { return timeAhead > -limit; });
     
+    if(!checkLimit(audioAheadOfVideoInCommonTimebase, timeAheadInCommonTimebaseLimit))
+        return 0;
+    
     int packetsMuxedCnt = 0;
     auto timebase = mediaCtxt.getTimeBase();
-    for(auto packet = mediaCtxt.getNextFrame();
-        isPacketValid(packet) && checkLimit(audioAheadOfVideoInCommonTimebase, timeAheadInCommonTimebaseLimit);
-        packet = mediaCtxt.getNextFrame(), ++packetsMuxedCnt)
+    for(auto packet = mediaCtxt.getNextFrame(); isPacketValid(packet); packet = mediaCtxt.getNextFrame())
     {
         audioAheadOfVideoInCommonTimebase += timeUpdateSign * av_rescale_q(packet.duration, timebase, AV_TIME_BASE_Q);
         isMuxedDataAvailable |= containerCtxt->muxFramePacket(std::move(packet));
+        ++packetsMuxedCnt;
+        if(!checkLimit(audioAheadOfVideoInCommonTimebase, timeAheadInCommonTimebaseLimit))
+            break;
     }
     return packetsMuxedCnt;
 }

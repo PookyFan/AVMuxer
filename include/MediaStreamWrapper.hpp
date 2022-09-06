@@ -42,7 +42,7 @@ class MediaStreamWrapper
 
         virtual operator bool()
         {
-            return (streamCtxt || streamCtxt->initializeFormat());
+            return (*streamCtxt || streamCtxt->initializeFormat());
         }
 
     protected:
