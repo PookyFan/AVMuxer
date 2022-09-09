@@ -14,6 +14,16 @@ class MediaStreamWrapper
     MediaStreamWrapper(MediaStreamWrapper&&) = delete;
     public:
         virtual ~MediaStreamWrapper() = default;
+
+        void updateRelativeTimeAhead(int64_t diff)
+        {
+            relativeTimeAhead += diff;
+        }
+
+        int64_t getRelativeTimeAhead() const
+        {
+            return relativeTimeAhead;
+        }
         
         virtual void fillBuffer(const ByteVector& data) const
         {
@@ -51,6 +61,7 @@ class MediaStreamWrapper
         }
 
     private:
+        int64_t relativeTimeAhead = 0;
         std::shared_ptr<MediaStreamContext> streamCtxt;
 };
 }

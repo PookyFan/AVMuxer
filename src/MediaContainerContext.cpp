@@ -70,10 +70,11 @@ bool MediaContainerContext::writeHeaderIfNeeded()
         return isHeaderWritten;
     
     AVDictionary* options = nullptr;
-    av_dict_set(&options, "movflags", "frag_keyframe+empty_moov+default_base_moof", 0);
+    if(std::string("mp4") == formatCtxt->oformat->name)
+        av_dict_set(&options, "movflags", "frag_keyframe+empty_moov+default_base_moof", 0);
     auto result = avformat_write_header(formatCtxt, &options);
     if(result < 0)
-        throw MuxerException("Couldn't write main header for MP4 container; the error was: " + getAvErrorString(result));
+        throw MuxerException("Couldn't write main header for container; the error was: " + getAvErrorString(result));
     
     return (isHeaderWritten = true);
 }
