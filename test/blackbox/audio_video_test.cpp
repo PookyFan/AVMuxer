@@ -4,21 +4,14 @@
 #include "Mp4Muxer.hpp"
 #include "utils.hpp"
 
+#include "TestLogger.hpp"
+
 constexpr auto BUFSIZE = 1048576; //1 MB
 
 extern "C"
 {
     #include <libavutil/log.h>
 }
-
-class TestLogger : public AVMuxer::ILogger
-{
-    public:
-        void logAVMuxerMessage(const ::std::string& msg, AVMuxer::LogLevel level) override
-        {
-            std::cout << msg << std::endl;
-        }
-};
 
 int main(int argc, char** argv)
 {
