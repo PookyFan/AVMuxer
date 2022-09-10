@@ -1,41 +1,35 @@
 #pragma once
 
-#include <memory>
-
-#include "MediaStreamWrapper.hpp"
-#include "MediaContainerWrapper.hpp"
+#include "Muxer.hpp"
 
 namespace AVMuxer
 {
-class Mp4Muxer
+class AudioVideoMp4Muxer : public Muxer<2>
 {
     public:
-        Mp4Muxer(AVRational framerate);
-        ~Mp4Muxer();
+        AudioVideoMp4Muxer(AVRational framerate) : Muxer<2>("mp4", framerate)
+        {}
 
-        bool hasMuxedData()
+        bool muxVideoData(const ByteVector& inputData)
         {
-            return isMuxedDataAvailable;
+            return muxMediaData<0>(inputData);
         }
 
-        bool muxAudioData(const ByteVector& inputData);
-        bool muxVideoData(const ByteVector& inputData);
-        bool flush();
-        ByteVector getMuxedData();
-    
-    protected:
-        std::shared_ptr<MediaContainerWrapper> containerCtxt;
-        WrappedMediaStreamSharedPtr  videoCtxt;
-        WrappedMediaStreamSharedPtr  audioCtxt;
+        bool muxAudioData(const ByteVector& inputData)
+        {
+            return muxMediaData<1>(inputData);
+        }
+};
 
-        int64_t audioAheadOfVideoInCommonTimebase;
-        int64_t timeAheadInCommonTimebaseLimit;
-        bool    isMuxedDataAvailable;
+class VideoOnlyMp4Muxer : public Muxer<1>
+{
+    public:
+        VideoOnlyMp4Muxer(AVRational framerate) : Muxer<1>("mp4", framerate)
+        {}
 
-    private:    
-        int muxAudioDataIntermediate(const ByteVector& inputData);
-        int muxVideoDataIntermediate(const ByteVector& inputData);
-        int muxMediaData(const ByteVector& inputData, MediaStreamWrapper& mediaCtxt, int timeUpdateSign);
-
+        bool muxVideoData(const ByteVector& inputData)
+        {
+            return muxMediaData<0>(inputData);
+        }
 };
 }

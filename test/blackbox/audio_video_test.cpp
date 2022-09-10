@@ -1,11 +1,10 @@
 #include <iostream>
 #include <fstream>
-#include <string_view>
 
 #include "Mp4Muxer.hpp"
 #include "utils.hpp"
 
-constexpr auto BUFSIZE = 256 * 4096;
+constexpr auto BUFSIZE = 1048576; //1 MB
 
 extern "C"
 {
@@ -25,8 +24,8 @@ int main(int argc, char** argv)
 {
     if(argc < 5)
     {
-        std::cout << "Usage: audio_video_test <input H264 video stream file path> "
-                     "<input FLAC stream file path> <output .mp4 file path> <fps>" << std::endl;
+        std::cout << "Usage: audio_video_test <input video stream file path> "
+                     "<input audio stream file path> <output .mp4 file path> <fps>" << std::endl;
         return 1;
     }
 
@@ -55,7 +54,7 @@ int main(int argc, char** argv)
     av_log_set_level(AV_LOG_TRACE);
     AVMuxer::setLogger(std::make_unique<TestLogger>());
     uint8_t buff[BUFSIZE];
-    AVMuxer::Mp4Muxer muxer({1, fps});
+    AVMuxer::AudioVideoMp4Muxer muxer({1, fps});
     for(;
         !videoFile.eof() && ( !(videoFile.eof() || videoFile.fail()) || !(audioFile.eof() || audioFile.fail()) );)
     {
@@ -116,10 +115,7 @@ int main(int argc, char** argv)
             break;
         }
     }
-
-    std::cout << "[TEST] videoFile.eof() = " << videoFile.eof() << " videoFile.fail() = " << videoFile.fail()
-                  << " audioFile.eof() = " << audioFile.eof() << " audioFile.fail() = " << audioFile.fail() << std::endl;
-
+    
     std::cout << "Video and audio muxed successfully" << std::endl;
     return 0;
 }
