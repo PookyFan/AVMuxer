@@ -1,2 +1,9 @@
 # AVMuxer
-Simple avcodec based library for muxing audio and video
+Simple FFMPEG based library for muxing audio and video.
+
+## Usage
+You can implement muxer for any (supported by FFMPEG) container format with any number of video and audio streams (within reason) by creating specialization of `Muxer` class. First, include `Muxer.hpp` header. In `Muxer` base template argument, specify overall number of streams in container. In `Muxer` class constructor, pass C-string with container name (ie. `"mp4"`) and either single instance or array of `AVRational` structures indicating framerate(s) of video stream(s) (you can't pass more framerates than declared streams, of course).
+Then, after creating your muxer object, use `muxMediaData<StreamIndex>()` to mux media data of particular stream with given, zero-based index (video streams go first in order of their framerates passed to `Muxer` class constructor). This method returns `true` if there is some muxed data available, and `false` otherwise.
+Finally, call `getMuxedData()` to retrieve vector of bytes that can be saved to media file, passed to player, or even streamed into the Internet (in case of MP4 at least). Keep muxing data for all streams, and don't "starve" any of them, because muxer will be stuck if there are too many queued media frames relatively to streams with empty muxing queue.
+
+There are sample MP4 muxer classes for easy usage - for muxing audio and video, and for muxing only video. (Why would you want to mux just video? For example to stream your video over Internet - without container, media stream could not be played properly, or would be played with incorrect framerate). They are defined in `Mp4Muxer.hpp` header.
