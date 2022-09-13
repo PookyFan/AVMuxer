@@ -4,6 +4,7 @@
 #include <vector>
 
 #include "AVIOContextWrapper.hpp"
+#include "DataStructures.hpp"
 
 extern "C"
 {
@@ -12,8 +13,6 @@ extern "C"
 
 namespace AVMuxer
 {
-using ByteVector = ::std::vector<uint8_t>;
-
 //Aligned either to entire cache line (64 bit systems) or half the cache line (32 bit systems)
 class alignas(8*sizeof(void*)) MediaStreamContext
 {
@@ -25,7 +24,7 @@ class alignas(8*sizeof(void*)) MediaStreamContext
         MediaStreamContext(MediaStreamContext&&) = default;
         ~MediaStreamContext();
 
-        void fillBuffer(const ByteVector& data) const;
+        void fillBuffer(const ByteArray& data) const;
         AVPacket getNextFrame();
 
         bool hasQueuedData() const

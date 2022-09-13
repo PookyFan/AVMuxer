@@ -10,12 +10,14 @@ class AudioVideoMp4Muxer : public Muxer<2>
         AudioVideoMp4Muxer(AVRational framerate) : Muxer<2>("mp4", framerate)
         {}
 
-        bool muxVideoData(const ByteVector& inputData)
+        template <class ContainerT>
+        bool muxVideoData(const ContainerT& inputData)
         {
             return muxMediaData<0>(inputData);
         }
 
-        bool muxAudioData(const ByteVector& inputData)
+        template <class ContainerT>
+        bool muxAudioData(const ContainerT& inputData)
         {
             return muxMediaData<1>(inputData);
         }
@@ -27,7 +29,8 @@ class VideoOnlyMp4Muxer : public Muxer<1>
         VideoOnlyMp4Muxer(AVRational framerate) : Muxer<1>("mp4", framerate)
         {}
 
-        bool muxVideoData(const ByteVector& inputData)
+        template <class ContainerT>
+        bool muxVideoData(const ContainerT& inputData)
         {
             return muxMediaData<0>(inputData);
         }

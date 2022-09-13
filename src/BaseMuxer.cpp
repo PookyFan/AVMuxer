@@ -21,7 +21,7 @@ ByteVector BaseMuxer::getMuxedData()
     return containerCtxt->getMuxedData();
 }
 
-int BaseMuxer::muxMediaData(MediaStreamWrapper& mediaCtxt, const ByteVector& inputData)
+int BaseMuxer::muxMediaData(MediaStreamWrapper& mediaCtxt, const ByteArray& inputData)
 {
     mediaCtxt.fillBuffer(inputData);
     if(!isContainerInitialized)

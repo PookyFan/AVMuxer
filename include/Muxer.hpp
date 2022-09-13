@@ -67,11 +67,11 @@ class Muxer : public BaseMuxer
             return mediaCtxt.getRelativeTimeAhead() > timeAheadInCommonTimebaseLimit;
         }
 
-        template <unsigned StreamNumber>
-        bool muxMediaData(const ByteVector& inputData)
+        template <unsigned StreamNumber, class ContainerT>
+        bool muxMediaData(const ContainerT& inputData)
         {
             static_assert(StreamNumber < StreamsCount);
-            BaseMuxer::muxMediaData(*streams[StreamNumber], inputData);
+            BaseMuxer::muxMediaData(*streams[StreamNumber], ByteArray { inputData.data(), inputData.size() });
             return hasMuxedData();
         }
 

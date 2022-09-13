@@ -1,5 +1,6 @@
 #pragma once
 
+#include "DataStructures.hpp"
 #include "MediaStreamWrapper.hpp"
 #include "MediaContainerWrapper.hpp"
 
@@ -23,7 +24,7 @@ class BaseMuxer
     protected:
         virtual void updateStreamRelativeTimeAhead(MediaStreamWrapper& mediaCtxt, int64_t diff) = 0;
         virtual bool shouldStreamBeLimited(MediaStreamWrapper& mediaCtxt) = 0;
-        int muxMediaData(MediaStreamWrapper& mediaCtxt, const ByteVector& inputData);
+        int muxMediaData(MediaStreamWrapper& mediaCtxt, const ByteArray& inputData);
 
         std::shared_ptr<MediaContainerWrapper> containerCtxt;
         int64_t timeAheadInCommonTimebaseLimit;

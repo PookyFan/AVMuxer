@@ -25,7 +25,7 @@ class MediaStreamWrapper
             return relativeTimeAhead;
         }
         
-        virtual void fillBuffer(const ByteVector& data) const
+        virtual void fillBuffer(const ByteArray& data) const
         {
             return streamCtxt->fillBuffer(data);
         }

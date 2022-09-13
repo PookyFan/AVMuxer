@@ -38,12 +38,12 @@ MediaStreamContext::~MediaStreamContext()
     reset();
 }
 
-void MediaStreamContext::fillBuffer(const ByteVector& data) const
+void MediaStreamContext::fillBuffer(const ByteArray& data) const
 {
     if(data.empty())
         return;
     
-    if(auto currentSize = mediaDataBuffer.size(); posInBuffer > 0 && (data.size() + currentSize) > mediaDataBuffer.capacity())
+    if(auto currentSize = mediaDataBuffer.size(); posInBuffer > 0 && (data.size + currentSize) > mediaDataBuffer.capacity())
     {
         std::move(mediaDataBuffer.begin() + posInBuffer, mediaDataBuffer.end(), mediaDataBuffer.begin());
         mediaDataBuffer.resize(currentSize - posInBuffer);

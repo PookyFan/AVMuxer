@@ -14,7 +14,7 @@ class MediaStreamMock : public MediaStreamWrapper
 
         operator bool() { return boolOp(); }
 
-        MOCK_METHOD(void, fillBuffer, (const ByteVector& data), (const, override));
+        MOCK_METHOD(void, fillBuffer, (const ByteArray& data), (const, override));
         MOCK_METHOD(AVPacket, getNextFrame, (), (override));
         MOCK_METHOD(bool, hasQueuedData, (), (const, override));
         MOCK_METHOD(size_t, getBufferedDataSize, (), (const, override));
